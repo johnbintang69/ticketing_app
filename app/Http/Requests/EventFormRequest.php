@@ -25,7 +25,7 @@ class EventFormRequest extends FormRequest
             'deskripsi' => 'required|string',
             'lokasi' => 'required|string|max:255',
             'kategori_id' => 'required|exists:kategoris,id',
-            'tanggal_waktu' => 'required|date',
+            'tanggal_waktu' => 'required|date|after:now',
             'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
 
             // Tickets validation rules
