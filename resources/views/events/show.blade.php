@@ -96,14 +96,11 @@
                                         @endif
                                     </div>
 
-                                    <button class="btn btn-primary w-full {{ $tiket->stok !== null && $tiket->stok <= 0 ? 'btn-disabled' : '' }}"
-                                            {{ $tiket->stok !== null && $tiket->stok <= 0 ? 'disabled' : '' }}>
-                                        @if ($tiket->stok !== null && $tiket->stok <= 0)
-                                            Habis Terjual
-                                        @else
-                                            Beli Sekarang
-                                        @endif
-                                    </button>
+                                     @if ($tiket->stok !== null && $tiket->stok <= 0)
+                                         <button class="btn btn-primary w-full btn-disabled" disabled>Habis Terjual</button>
+                                     @else
+                                         <a href="{{ route('checkout.show', $tiket) }}" class="btn btn-primary w-full">Beli Sekarang</a>
+                                     @endif
                                 </div>
                             </div>
                         @endforeach

@@ -56,9 +56,11 @@
           <a href="{{ route('dashboard') }}">Dashboard</a>
         </li>
         @endif
+        @if(Auth::user()->role === 'user')
         <li>
           <a href="{{ route('transactions.index') }}">Riwayat Transaksi</a>
         </li>
+        @endif
         <li>
           <a href="{{ route('profile.edit') }}" class="justify-between">
             Profile <span class="badge">{{ Auth::user()->name }}</span>

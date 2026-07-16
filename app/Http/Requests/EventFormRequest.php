@@ -19,13 +19,26 @@ class EventFormRequest extends FormRequest
      */
     public function rules(): array
     {
+        $event = $this->route('event');
+        if (is_numeric($event) || is_string($event)) {
+            $event = \App\Models\Event::find($event);
+        }
+
+        $tanggalWaktuRules = 'required|date';
+        
+        // Only enforce after:now if we are creating a new event,
+        // or if the date_time is being modified.
+        if (!$event || ($event && \Carbon\Carbon::parse($this->tanggal_waktu)->format('Y-m-d H:i') !== \Carbon\Carbon::parse($event->tanggal_waktu)->format('Y-m-d H:i'))) {
+            $tanggalWaktuRules .= '|after:now';
+        }
+
         return [
             // Event validation rules
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'lokasi' => 'required|string|max:255',
             'kategori_id' => 'required|exists:kategoris,id',
-            'tanggal_waktu' => 'required|date|after:now',
+            'tanggal_waktu' => $tanggalWaktuRules,
             'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
 
             // Tickets validation rules

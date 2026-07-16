@@ -5,6 +5,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\CheckoutController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -43,8 +45,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/checkout/{tiket}', [CheckoutController::class, 'show'])->name('checkout.show');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::get('/pembayaran-sukses', [CheckoutController::class, 'success'])->name('checkout.success');
 });
 
-Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+// Admin Payment Methods
+Route::prefix('admin')->name('payment-methods.')->middleware(['auth', 'verified', 'admin'])->group(function () {
+    Route::get('/payment-methods', [PaymentMethodController::class, 'index'])->name('index');
+    Route::post('/payment-methods', [PaymentMethodController::class, 'store'])->name('store');
+    Route::put('/payment-methods/{id}', [PaymentMethodController::class, 'update'])->name('update');
+    Route::delete('/payment-methods/{id}', [PaymentMethodController::class, 'destroy'])->name('destroy');
+});
 
 require __DIR__.'/auth.php';

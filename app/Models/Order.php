@@ -9,6 +9,9 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'total_harga',
+        'event_id',
+        'order_date',
+        'metode_pembayaran_id',
     ];
 
     public function user()
@@ -23,7 +26,12 @@ class Order extends Model
 
     public function events()
     {
-        return $this->belongsTo(Event::class);
+        return $this->belongsTo(Event::class, 'event_id');
+    }
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class, 'event_id');
     }
 
     public function detailOrders()
@@ -31,4 +39,8 @@ class Order extends Model
         return $this->hasMany(DetailOrder::class);
     }
 
+    public function metodePembayaran()
+    {
+        return $this->belongsTo(MetodePembayaran::class, 'metode_pembayaran_id');
+    }
 }
