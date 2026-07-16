@@ -13,10 +13,12 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Event routes
 Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified', 'admin'])->name('dashboard');
+
+Route::get('/riwayat-transaksi', [HomeController::class, 'transactions'])->middleware(['auth'])->name('transactions.index');
 
 // Category routes (admin)
-Route::prefix('admin')->name('categories.')->middleware(['auth', 'verified'])->group(function () {
+Route::prefix('admin')->name('categories.')->middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::get('/categories', [CategoryController::class, 'index'])->name('index');
     Route::post('/categories', [CategoryController::class, 'store'])->name('store');
     Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('update');
@@ -24,7 +26,7 @@ Route::prefix('admin')->name('categories.')->middleware(['auth', 'verified'])->g
 });
 
 // Event routes (admin)
-Route::prefix('admin')->name('admin.events.')->middleware(['auth', 'verified'])->group(function () {
+Route::prefix('admin')->name('admin.events.')->middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::get('/events/export', [EventController::class, 'export'])->name('export');
     Route::post('/events/bulk-delete', [EventController::class, 'bulkDestroy'])->name('bulk-destroy');
     Route::post('/events/{event}/clone', [EventController::class, 'clone'])->name('clone');

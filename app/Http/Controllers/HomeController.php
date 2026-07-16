@@ -36,4 +36,17 @@ class HomeController extends Controller
             'events' => $events,
         ]);
     }
+
+    /**
+     * Display the logged-in user's transaction history.
+     */
+    public function transactions()
+    {
+        $orders = \App\Models\Order::where('user_id', auth()->id())
+            ->with(['events', 'tikets'])
+            ->latest()
+            ->get();
+
+        return view('pages.transactions', compact('orders'));
+    }
 }

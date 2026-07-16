@@ -97,3 +97,33 @@ test('admin can access dashboard analytics page', function () {
     $response->assertViewIs('pages.admin.dashboard');
     $response->assertViewHasAll(['stats', 'recent_events', 'recent_orders']);
 });
+
+test('regular user cannot access dashboard analytics page', function () {
+    User::unguard();
+    $user = User::create([
+        'name' => 'Regular User',
+        'email' => 'user_dashboard@example.com',
+        'password' => bcrypt('password'),
+        'role' => 'user',
+    ]);
+    User::reguard();
+
+    $response = $this->actingAs($user)->get(route('dashboard'));
+
+    $response->assertStatus(403);
+});
+
+test('regular user cannot access categories index page', function () {
+    User::unguard();
+    $user = User::create([
+        'name' => 'Regular User',
+        'email' => 'user_cat@example.com',
+        'password' => bcrypt('password'),
+        'role' => 'user',
+    ]);
+    User::reguard();
+
+    $response = $this->actingAs($user)->get(route('categories.index'));
+
+    $response->assertStatus(403);
+});

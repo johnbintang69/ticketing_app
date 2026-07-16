@@ -46,7 +46,11 @@ class RegisteredUserController extends Controller
         Auth::login($user);
         
         // Merubah route nya
-        return redirect(route('dashboard', absolute: false));
+        if (Auth::user()->role === 'admin') {
+            return redirect(route('dashboard', absolute: false));
+        }
+
+        return redirect(route('transactions.index', absolute: false));
     }
 }
 
