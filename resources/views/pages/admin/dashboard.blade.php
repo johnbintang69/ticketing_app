@@ -1,127 +1,182 @@
 @extends('layouts.admin_layouts')
 
-@section('title', 'Manajemen Kategori')
+@section('title', 'Dashboard')
 
 @section('content')
+<div class="container mx-auto p-6 md:p-10 space-y-8">
+    <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-gray-800">Ringkasan Analitik</h1>
+        <div class="text-sm text-gray-500">Data terupdate pada {{ now()->format('d M Y, H:i') }}</div>
+    </div>
 
-    <div class="container mx-auto p-10">
-        <div class="flex">
-            <h1 class="text-3xl font-semibold mb-4">Manajemen Kategori</h1>
-            <button class="btn btn-primary ml-auto" onclick="add_modal.showModal()">Tambah Kategori</button>
+    <!-- Stats Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <!-- Card 1: Total Revenue -->
+        <div class="card bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md p-6 rounded-box transition-all hover:scale-[1.02]">
+            <div class="flex justify-between items-start mb-2">
+                <span class="text-emerald-100 font-medium text-sm">Pendapatan Total</span>
+                <span class="p-1.5 bg-emerald-400/30 rounded-md">💰</span>
+            </div>
+            <div class="text-2xl font-bold">Rp {{ number_format($stats['total_revenue'], 0, ',', '.') }}</div>
+            <div class="text-xs text-emerald-100 mt-2">Dari seluruh pesanan tiket</div>
         </div>
-        <div class="overflow-x-auto rounded-box bg-white p-5 shadow-xs">
-            <table class="table">
-                <!-- head -->
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th class="w-3/4">Nama Kategori</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($categories as $index => $category)
-                    <tr>
-                        <th>{{ $index + 1 }}</th>
-                        <td>{{ $category->nama }}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary mr-2" onclick="openEditModal(this)" data-id="{{ $category->id }}" data-nama="{{ $category->nama }}">Edit</button>
-                            <button class="btn btn-sm bg-red-500 text-white" onclick="openDeleteModal(this)" data-id="{{ $category->id }}">Hapus</button>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="3" class="text-center">Tidak ada kategori tersedia.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+
+        <!-- Card 2: Tickets Sold -->
+        <div class="card bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md p-6 rounded-box transition-all hover:scale-[1.02]">
+            <div class="flex justify-between items-start mb-2">
+                <span class="text-blue-100 font-medium text-sm">Tiket Terjual</span>
+                <span class="p-1.5 bg-blue-400/30 rounded-md">🎟️</span>
+            </div>
+            <div class="text-3xl font-bold">{{ number_format($stats['total_tickets_sold'], 0, ',', '.') }}</div>
+            <div class="text-xs text-blue-100 mt-2">Tiket terdistribusi</div>
+        </div>
+
+        <!-- Card 3: Total Events -->
+        <div class="card bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-md p-6 rounded-box transition-all hover:scale-[1.02]">
+            <div class="flex justify-between items-start mb-2">
+                <span class="text-purple-100 font-medium text-sm">Total Event</span>
+                <span class="p-1.5 bg-purple-400/30 rounded-md">🎪</span>
+            </div>
+            <div class="text-3xl font-bold">{{ $stats['total_events'] }}</div>
+            <div class="text-xs text-purple-100 mt-2">{{ $stats['upcoming_events'] }} Event akan datang</div>
+        </div>
+
+        <!-- Card 4: Total Orders -->
+        <div class="card bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md p-6 rounded-box transition-all hover:scale-[1.02]">
+            <div class="flex justify-between items-start mb-2">
+                <span class="text-amber-100 font-medium text-sm">Total Transaksi</span>
+                <span class="p-1.5 bg-amber-400/30 rounded-md">🛍️</span>
+            </div>
+            <div class="text-3xl font-bold">{{ $stats['total_orders'] }}</div>
+            <div class="text-xs text-amber-100 mt-2">Pesanan sukses diproses</div>
+        </div>
+
+        <!-- Card 5: Total Categories -->
+        <div class="card bg-gradient-to-br from-gray-700 to-slate-800 text-white shadow-md p-6 rounded-box transition-all hover:scale-[1.02]">
+            <div class="flex justify-between items-start mb-2">
+                <span class="text-gray-200 font-medium text-sm">Total Kategori</span>
+                <span class="p-1.5 bg-slate-600/30 rounded-md">🏷️</span>
+            </div>
+            <div class="text-3xl font-bold">{{ $stats['total_categories'] }}</div>
+            <div class="text-xs text-gray-200 mt-2">Klasifikasi jenis event</div>
         </div>
     </div>
 
-    <!-- Add Category Modal -->
-    <dialog id="add_modal" class="modal">
-        <form method="POST" action="{{ route('categories.store') }}" class="modal-box">
-            @csrf
-            <h3 class="text-lg font-bold mb-4">Tambah Kategori</h3>
-            <div class="form-control w-full mb-4">
-                <label class="label mb-2">
-                    <span class="label-text">Nama Kategori</span>
-                </label>
-                <input type="text" placeholder="Masukkan nama kategori" class="input input-bordered w-full" name="nama" required />
+    <!-- Status Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-blue-50 border border-blue-100 p-5 rounded-box flex items-center justify-between shadow-xs">
+            <div>
+                <div class="text-sm font-semibold text-blue-800">Upcoming Events</div>
+                <div class="text-xs text-blue-600 mt-1">Akan diselenggarakan</div>
             </div>
-            <div class="modal-action">
-                <button class="btn btn-primary" type="submit">Simpan</button>
-                <button class="btn" onclick="add_modal.close()" type="reset">Batal</button>
+            <span class="badge badge-info text-white text-lg font-bold p-3">{{ $stats['upcoming_events'] }}</span>
+        </div>
+        <div class="bg-green-50 border border-green-100 p-5 rounded-box flex items-center justify-between shadow-xs">
+            <div>
+                <div class="text-sm font-semibold text-green-800">Ongoing Events</div>
+                <div class="text-xs text-green-600 mt-1">Sedang berlangsung</div>
             </div>
-        </form>
-    </dialog>
-
-    <!-- Edit Category Modal With Retrieve ID -->
-     <dialog id="edit_modal" class="modal">
-        <form method="POST" class="modal-box">
-            @csrf
-            @method('PUT')
-
-            <input type="hidden" name="category_id" id="edit_category_id">
-
-            <h3 class="text-lg font-bold mb-4">Edit Kategori</h3>
-            <div class="form-control w-full mb-4">
-                <label class="label mb-2">
-                    <span class="label-text">Nama Kategori</span>
-                </label>
-                <input type="text" placeholder="Masukkan nama kategori" class="input input-bordered w-full" value="Kategori Contoh" id="edit_category_name" name="nama" />
+            <span class="badge badge-success text-white text-lg font-bold p-3">{{ $stats['ongoing_events'] }}</span>
+        </div>
+        <div class="bg-gray-100 border border-gray-200 p-5 rounded-box flex items-center justify-between shadow-xs">
+            <div>
+                <div class="text-sm font-semibold text-gray-800">Completed Events</div>
+                <div class="text-xs text-gray-600 mt-1">Telah selesai dilaksanakan</div>
             </div>
-            <div class="modal-action">
-                <button class="btn btn-primary" type="submit">Simpan</button>
-                <button class="btn" onclick="edit_modal.close()" type="reset">Batal</button>
+            <span class="badge badge-neutral text-lg font-bold p-3">{{ $stats['completed_events'] }}</span>
+        </div>
+    </div>
+
+    <!-- Tables Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Recent Events -->
+        <div class="card bg-white shadow-xs p-6 rounded-box border">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">Event Terbaru</h3>
+                <a href="{{ route('admin.events.index') }}" class="text-xs text-blue-600 hover:underline">Lihat Semua</a>
             </div>
-        </form>
-    </dialog>
-
-    <!-- Delete Modal -->
-    <dialog id="delete_modal" class="modal">
-        <form method="POST" class="modal-box">
-            @csrf
-            @method('DELETE')
-
-            <input type="hidden" name="category_id" id="delete_category_id">
-
-            <h3 class="text-lg font-bold mb-4">Hapus Kategori</h3>
-            <p>Apakah Anda yakin ingin menghapus kategori ini?</p>
-            <div class="modal-action">
-                <button class="btn btn-primary" type="submit">Hapus</button>
-                <button class="btn" onclick="delete_modal.close()" type="reset">Batal</button>
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <thead>
+                        <tr>
+                            <th>Judul Event</th>
+                            <th>Kategori</th>
+                            <th>Tanggal & Waktu</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($recent_events as $event)
+                        <tr class="hover:bg-gray-50">
+                            <td class="font-medium text-gray-800 text-sm">{{ $event->judul }}</td>
+                            <td>
+                                <span class="badge badge-ghost badge-sm">{{ $event->kategori->nama ?? 'N/A' }}</span>
+                            </td>
+                            <td class="text-xs">
+                                {{ $event->tanggal_waktu ? $event->tanggal_waktu->format('d M Y, H:i') : 'N/A' }}
+                            </td>
+                            <td>
+                                @if($event->status === 'Upcoming')
+                                    <span class="badge badge-info text-white badge-xs">{{ $event->status }}</span>
+                                @elseif($event->status === 'Ongoing')
+                                    <span class="badge badge-success text-white badge-xs">{{ $event->status }}</span>
+                                @else
+                                    <span class="badge badge-neutral badge-xs">{{ $event->status }}</span>
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="text-center text-gray-500 text-sm py-4">Belum ada event tersedia.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
-        </form>
-    </dialog>
+        </div>
 
-    <script>
-        function openEditModal(button) {
-            const name = button.dataset.nama;
-            const id = button.dataset.id;
-            const form = document.querySelector('#edit_modal form');
-            
-            document.getElementById("edit_category_name").value = name;
-            document.getElementById("edit_category_id").value = id;
-
-             // Set action dengan parameter ID
-            form.action = `{{ url('/admin/categories') }}/${id}`
-
-            edit_modal.showModal();
-        }
-
-        function openDeleteModal(button) {
-            const id = button.dataset.id;
-            const form = document.querySelector('#delete_modal form');
-            document.getElementById("delete_category_id").value = id;
-
-            // Set action dengan parameter ID
-            form.action = `{{ url('/admin/categories') }}/${id}`
-
-            delete_modal.showModal();
-        }
-</script>
-
-
+        <!-- Recent Transactions -->
+        <div class="card bg-white shadow-xs p-6 rounded-box border">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">Transaksi Terbaru</h3>
+                <span class="text-xs text-gray-400">5 Pesanan Terakhir</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <thead>
+                        <tr>
+                            <th>Pembeli</th>
+                            <th>Event</th>
+                            <th>Tanggal Order</th>
+                            <th class="text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($recent_orders as $order)
+                        <tr class="hover:bg-gray-50">
+                            <td>
+                                <div class="text-sm font-semibold text-gray-800">{{ $order->user->name ?? 'N/A' }}</div>
+                                <div class="text-xs text-gray-400">{{ $order->user->email ?? 'N/A' }}</div>
+                            </td>
+                            <td class="text-sm text-gray-700 max-w-[150px] truncate">
+                                {{ $order->events->judul ?? 'N/A' }}
+                            </td>
+                            <td class="text-xs text-gray-500">
+                                {{ $order->order_date ? \Carbon\Carbon::parse($order->order_date)->format('d M Y, H:i') : 'N/A' }}
+                            </td>
+                            <td class="font-bold text-gray-800 text-right text-sm">
+                                Rp {{ number_format($order->total_harga, 0, ',', '.') }}
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="text-center text-gray-500 text-sm py-4">Belum ada transaksi diproses.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

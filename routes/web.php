@@ -17,7 +17,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
 
 // Category routes (admin)
 Route::prefix('admin')->name('categories.')->middleware(['auth', 'verified'])->group(function () {
-    Route::get('/categories', [DashboardController::class, 'index'])->name('index');
+    Route::get('/categories', [CategoryController::class, 'index'])->name('index');
     Route::post('/categories', [CategoryController::class, 'store'])->name('store');
     Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('update');
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('destroy');
