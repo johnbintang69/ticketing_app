@@ -9,12 +9,17 @@ test('validation passes with valid data', function () {
         'nama' => 'Konser',
     ]);
 
+    $lokasi = \App\Models\ManagementLokasi::create([
+        'nama_lokasi' => 'Stadion Utama',
+        'is_active' => true,
+    ]);
+
     $rules = (new EventFormRequest())->rules();
 
     $data = [
         'judul' => 'Konser Musik Keren',
         'deskripsi' => 'Deskripsi konser musik keren.',
-        'lokasi' => 'Stadion Utama',
+        'lokasi_id' => $lokasi->id,
         'kategori_id' => $kategori->id,
         'tanggal_waktu' => now()->addDays(2)->toDateTimeString(),
         'tikets' => [
@@ -42,7 +47,7 @@ test('validation fails with invalid data', function () {
     $data = [
         'judul' => '',
         'deskripsi' => '',
-        'lokasi' => '',
+        'lokasi_id' => '',
         'kategori_id' => 9999, // nonexistent
         'tanggal_waktu' => now()->subDays(1)->toDateTimeString(), // in the past
         'tikets' => []
@@ -52,7 +57,7 @@ test('validation fails with invalid data', function () {
 
     expect($validator->passes())->toBeFalse();
     expect($validator->errors()->keys())->toContain(
-        'judul', 'deskripsi', 'lokasi', 'kategori_id', 'tanggal_waktu', 'tikets'
+        'judul', 'deskripsi', 'lokasi_id', 'kategori_id', 'tanggal_waktu', 'tikets'
     );
 });
 

@@ -22,7 +22,9 @@ class EventController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('judul', 'like', '%' . $search . '%')
-                  ->orWhere('lokasi', 'like', '%' . $search . '%');
+                  ->orWhereHas('lokasiModel', function ($l) use ($search) {
+                      $l->where('nama_lokasi', 'like', '%' . $search . '%');
+                  });
             });
         }
 
@@ -64,7 +66,8 @@ class EventController extends Controller
     public function create()
     {
         $categories = Kategori::all();
-        return view('pages.admin.events.create', compact('categories'));
+        $locations = \App\Models\ManagementLokasi::where('is_active', true)->get();
+        return view('pages.admin.events.create', compact('categories', 'locations'));
     }
 
     public function store(EventFormRequest $request)
@@ -82,7 +85,7 @@ class EventController extends Controller
             'kategori_id' => $validated['kategori_id'],
             'judul' => $validated['judul'],
             'deskripsi' => $validated['deskripsi'],
-            'lokasi' => $validated['lokasi'],
+            'lokasi_id' => $validated['lokasi_id'],
             'gambar' => $imagePath,
             'tanggal_waktu' => $validated['tanggal_waktu'],
         ]);
@@ -102,12 +105,13 @@ class EventController extends Controller
     public function edit(Event $event)
     {
         $categories = Kategori::all();
+        $locations = \App\Models\ManagementLokasi::where('is_active', true)->get();
         $event->load(['tikets', 'statusHistories' => function($q) {
             $q->latest();
         }]);
         $hasSales = $event->hasSales();
 
-        return view('pages.admin.events.edit', compact('event', 'categories', 'hasSales'));
+        return view('pages.admin.events.edit', compact('event', 'categories', 'locations', 'hasSales'));
     }
 
     public function update(EventFormRequest $request, Event $event)
@@ -140,7 +144,7 @@ class EventController extends Controller
             'kategori_id' => $validated['kategori_id'],
             'judul' => $validated['judul'],
             'deskripsi' => $validated['deskripsi'],
-            'lokasi' => $validated['lokasi'],
+            'lokasi_id' => $validated['lokasi_id'],
             'gambar' => $imagePath,
             'tanggal_waktu' => $validated['tanggal_waktu'],
         ]);

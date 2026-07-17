@@ -109,6 +109,7 @@ test('admin can store event with tickets and redirect', function () {
     User::reguard();
 
     $kategori = Kategori::create(['nama' => 'Konser']);
+    $lokasi = \App\Models\ManagementLokasi::create(['nama_lokasi' => 'Stadion Utama', 'is_active' => true]);
 
     $file = UploadedFile::fake()->create('event.jpg', 100);
 
@@ -116,7 +117,7 @@ test('admin can store event with tickets and redirect', function () {
         'kategori_id' => $kategori->id,
         'judul' => 'Konser Rock Spesial',
         'deskripsi' => 'Konser musik rock paling asik.',
-        'lokasi' => 'Stadion Utama',
+        'lokasi_id' => $lokasi->id,
         'gambar' => $file,
         'tanggal_waktu' => now()->addDays(3)->toDateTimeString(),
         'tikets' => [
@@ -137,7 +138,7 @@ test('admin can store event with tickets and redirect', function () {
 
     $this->assertDatabaseHas('events', [
         'judul' => 'Konser Rock Spesial',
-        'lokasi' => 'Stadion Utama',
+        'lokasi_id' => $lokasi->id,
     ]);
 
     $event = Event::where('judul', 'Konser Rock Spesial')->first();
@@ -214,11 +215,13 @@ test('admin can update event data and tickets', function () {
 
     // Update payload:
     // Update ticket1 (change stok), omit ticket2 (should delete it), add new ticket3
+    $lokasiJakarta = \App\Models\ManagementLokasi::create(['nama_lokasi' => 'Jakarta', 'is_active' => true]);
+
     $response = $this->actingAs($admin)->put(route('admin.events.update', $event), [
         'kategori_id' => $kategori->id,
         'judul' => 'Event Baru',
         'deskripsi' => 'Deskripsi Baru',
-        'lokasi' => 'Jakarta',
+        'lokasi_id' => $lokasiJakarta->id,
         'gambar' => $newFile,
         'tanggal_waktu' => now()->addDays(3)->toDateTimeString(),
         'tikets' => [
@@ -241,7 +244,7 @@ test('admin can update event data and tickets', function () {
     $this->assertDatabaseHas('events', [
         'id' => $event->id,
         'judul' => 'Event Baru',
-        'lokasi' => 'Jakarta',
+        'lokasi_id' => $lokasiJakarta->id,
     ]);
 
     $event->refresh();
@@ -294,7 +297,7 @@ test('admin cannot update date_time of event with sales', function () {
         'kategori_id' => $kategori->id,
         'judul' => 'Event With Sales Changed',
         'deskripsi' => 'Deskripsi',
-        'lokasi' => 'Bandung',
+        'lokasi_id' => $event->lokasi_id,
         'tanggal_waktu' => now()->addDays(3)->toDateTimeString(), // changed
         'tikets' => [
             [
@@ -675,4 +678,40 @@ test('event status history is recorded on creation and update', function () {
     expect($event->statusHistories)->toHaveCount(2);
     expect($event->statusHistories->last()->old_status)->toBe('Upcoming');
     expect($event->statusHistories->last()->new_status)->toBe('Completed');
+});
+
+test('admin can access locations index page', function () {
+    User::unguard();
+    $admin = User::create([
+        'name' => 'Admin User',
+        'email' => 'admin_loc@example.com',
+        'password' => bcrypt('password'),
+        'role' => 'admin',
+    ]);
+    User::reguard();
+
+    $response = $this->actingAs($admin)->get(route('locations.index'));
+    $response->assertStatus(200);
+});
+
+test('admin can store a new location', function () {
+    User::unguard();
+    $admin = User::create([
+        'name' => 'Admin User',
+        'email' => 'admin_loc_store@example.com',
+        'password' => bcrypt('password'),
+        'role' => 'admin',
+    ]);
+    User::reguard();
+
+    $response = $this->actingAs($admin)->post(route('locations.store'), [
+        'nama_lokasi' => 'Stadion Baru',
+        'is_active' => true,
+    ]);
+
+    $response->assertRedirect(route('locations.index'));
+    $this->assertDatabaseHas('management_lokasis', [
+        'nama_lokasi' => 'Stadion Baru',
+        'is_active' => 1,
+    ]);
 });

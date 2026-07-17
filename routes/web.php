@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\LocationController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -57,6 +58,14 @@ Route::prefix('admin')->name('payment-methods.')->middleware(['auth', 'verified'
     Route::post('/payment-methods', [PaymentMethodController::class, 'store'])->name('store');
     Route::put('/payment-methods/{id}', [PaymentMethodController::class, 'update'])->name('update');
     Route::delete('/payment-methods/{id}', [PaymentMethodController::class, 'destroy'])->name('destroy');
+});
+
+// Admin Locations
+Route::prefix('admin')->name('locations.')->middleware(['auth', 'verified', 'admin'])->group(function () {
+    Route::get('/locations', [LocationController::class, 'index'])->name('index');
+    Route::post('/locations', [LocationController::class, 'store'])->name('store');
+    Route::put('/locations/{id}', [LocationController::class, 'update'])->name('update');
+    Route::delete('/locations/{id}', [LocationController::class, 'destroy'])->name('destroy');
 });
 
 require __DIR__.'/auth.php';

@@ -12,9 +12,9 @@ class Event extends Model
     protected $fillable = [
         'user_id',
         'kategori_id',
+        'lokasi_id',
         'judul',
         'deskripsi',
-        'lokasi',
         'gambar',
         'tanggal_waktu',
     ];
@@ -37,6 +37,17 @@ class Event extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function lokasiModel()
+    {
+        return $this->belongsTo(ManagementLokasi::class, 'lokasi_id');
+    }
+
+    public function getLokasiAttribute()
+    {
+        return $this->lokasiModel ? $this->lokasiModel->nama_lokasi : null;
+    }
+
     public function orders()
     {
         return $this->hasMany(Order::class);
@@ -68,6 +79,22 @@ class Event extends Model
 
     protected static function booted()
     {
+        static::saving(function ($event) {
+            $attributes = $event->getAttributes();
+            if (array_key_exists('lokasi', $attributes) && empty($event->lokasi_id)) {
+                $lokasiName = $attributes['lokasi'];
+                if ($lokasiName) {
+                    $lokasi = \App\Models\ManagementLokasi::firstOrCreate([
+                        'nama_lokasi' => $lokasiName,
+                    ], [
+                        'is_active' => true,
+                    ]);
+                    $event->lokasi_id = $lokasi->id;
+                }
+                unset($event->lokasi);
+            }
+        });
+
         static::created(function ($event) {
             $event->statusHistories()->create([
                 'old_status' => null,
