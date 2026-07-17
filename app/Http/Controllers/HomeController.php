@@ -17,7 +17,10 @@ class HomeController extends Controller
         $categories = Kategori::all();
 
         // Build event query
-        $eventsQuery = Event::with(['kategori', 'tikets']);
+        $eventsQuery = Event::with(['kategori', 'tikets'])
+            ->whereHas('lokasiModel', function ($q) {
+                $q->where('is_active', true);
+            });
 
         // Filter by category if specified
         if ($request->has('kategori') && $request->kategori) {

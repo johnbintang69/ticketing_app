@@ -48,7 +48,11 @@ class EventController extends Controller
     public function show(Event $event)
     {
         // Load the event with its relationships
-        $event->load(['kategori', 'tikets']);
+        $event->load(['kategori', 'tikets', 'lokasiModel']);
+
+        if ($event->lokasiModel && !$event->lokasiModel->is_active) {
+            abort(404);
+        }
 
         // Related events (kategori sama, tanggal > now, max 4 events)
         $relatedEvents = Event::with('tikets')->where('kategori_id', $event->kategori_id)

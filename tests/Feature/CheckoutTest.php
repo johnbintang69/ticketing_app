@@ -213,3 +213,82 @@ test('admin can deactivate an existing payment method', function () {
     $paymentMethod->refresh();
     expect($paymentMethod->is_active)->toBeFalse();
 });
+
+test('user cannot checkout if event location is inactive', function () {
+    User::unguard();
+    $user = User::create([
+        'name' => 'Regular User',
+        'email' => 'user_loc_inactive@example.com',
+        'password' => bcrypt('password'),
+        'role' => 'user',
+    ]);
+    User::reguard();
+
+    $kategori = Kategori::create(['nama' => 'Konser']);
+    $inactiveLocation = \App\Models\ManagementLokasi::create(['nama_lokasi' => 'Stadion Nonaktif', 'is_active' => false]);
+    
+    Event::unguard();
+    $event = Event::create([
+        'user_id' => 1,
+        'kategori_id' => $kategori->id,
+        'judul' => 'Event Di Lokasi Nonaktif',
+        'deskripsi' => 'Deskripsi',
+        'lokasi_id' => $inactiveLocation->id,
+        'gambar' => 'konser.jpg',
+        'tanggal_waktu' => now()->addDays(2),
+    ]);
+    Event::reguard();
+
+    $tiket = $event->tikets()->create(['tipe' => 'reguler', 'harga' => 50000, 'stok' => 10]);
+
+    $response = $this->actingAs($user)->get(route('checkout.show', $tiket->id));
+
+    $response->assertRedirect(route('home'));
+    $response->assertSessionHas('error', 'Event ini tidak dapat dipesan karena lokasinya sedang tidak aktif.');
+});
+
+test('user cannot store order if event location is inactive', function () {
+    User::unguard();
+    $user = User::create([
+        'name' => 'Regular User',
+        'email' => 'user_loc_inactive_store@example.com',
+        'password' => bcrypt('password'),
+        'role' => 'user',
+    ]);
+    User::reguard();
+
+    $kategori = Kategori::create(['nama' => 'Konser']);
+    $inactiveLocation = \App\Models\ManagementLokasi::create(['nama_lokasi' => 'Stadion Nonaktif 2', 'is_active' => false]);
+    
+    Event::unguard();
+    $event = Event::create([
+        'user_id' => 1,
+        'kategori_id' => $kategori->id,
+        'judul' => 'Event Di Lokasi Nonaktif 2',
+        'deskripsi' => 'Deskripsi',
+        'lokasi_id' => $inactiveLocation->id,
+        'gambar' => 'konser.jpg',
+        'tanggal_waktu' => now()->addDays(2),
+    ]);
+    Event::reguard();
+
+    $tiket = $event->tikets()->create(['tipe' => 'reguler', 'harga' => 50000, 'stok' => 10]);
+    $paymentMethod = MetodePembayaran::create([
+        'nama' => 'DANA',
+        'tipe' => 'E-Wallet',
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($user)->post(route('checkout.store'), [
+        'tiket_id' => $tiket->id,
+        'jumlah' => 1,
+        'metode_pembayaran_id' => $paymentMethod->id,
+    ]);
+
+    $response->assertRedirect(route('home'));
+    $response->assertSessionHas('error', 'Event ini tidak dapat dipesan karena lokasinya sedang tidak aktif.');
+    $this->assertDatabaseMissing('orders', [
+        'user_id' => $user->id,
+        'event_id' => $event->id,
+    ]);
+});

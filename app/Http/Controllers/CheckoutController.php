@@ -16,7 +16,11 @@ class CheckoutController extends Controller
      */
     public function show(Request $request, Tiket $tiket)
     {
-        $tiket->load('event');
+        $tiket->load('event.lokasiModel');
+        
+        if ($tiket->event->lokasiModel && !$tiket->event->lokasiModel->is_active) {
+            return redirect()->route('home')->with('error', 'Event ini tidak dapat dipesan karena lokasinya sedang tidak aktif.');
+        }
         
         // Load all active payment methods
         $paymentMethods = MetodePembayaran::where('is_active', true)->get();
@@ -36,6 +40,11 @@ class CheckoutController extends Controller
         ]);
 
         $tiket = Tiket::findOrFail($request->tiket_id);
+        $tiket->load('event.lokasiModel');
+
+        if ($tiket->event->lokasiModel && !$tiket->event->lokasiModel->is_active) {
+            return redirect()->route('home')->with('error', 'Event ini tidak dapat dipesan karena lokasinya sedang tidak aktif.');
+        }
 
         if ($tiket->stok !== null && $tiket->stok < $request->jumlah) {
             return redirect()->back()
