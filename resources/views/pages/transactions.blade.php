@@ -28,7 +28,16 @@
                   <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-2">
                     <div>
                       <h2 class="text-xl font-bold text-gray-800">{{ $order->events->judul ?? 'Event' }}</h2>
-                      <p class="text-xs text-gray-400 mt-1">ID Transaksi: #{{ $order->id }} | Tanggal Order: {{ \Carbon\Carbon::parse($order->order_date)->format('d M Y, H:i') }} WIB</p>
+                      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs text-gray-400">
+                        <span class="flex items-center gap-1 font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                          {{ $order->events->lokasi ?? 'N/A' }}
+                        </span>
+                        <span class="opacity-50">|</span>
+                        <span>ID Transaksi: #{{ $order->id }}</span>
+                        <span class="opacity-50">|</span>
+                        <span>Tanggal Order: {{ \Carbon\Carbon::parse($order->order_date)->format('d M Y, H:i') }} WIB</span>
+                      </div>
                     </div>
                     <div class="text-right">
                       <div class="text-xs text-gray-500 font-medium">Total Pembayaran</div>

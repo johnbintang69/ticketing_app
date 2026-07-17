@@ -158,8 +158,12 @@
                                 <div class="text-sm font-semibold text-gray-800">{{ $order->user->name ?? 'N/A' }}</div>
                                 <div class="text-xs text-gray-400">{{ $order->user->email ?? 'N/A' }}</div>
                             </td>
-                            <td class="text-sm text-gray-700 max-w-[150px] truncate">
-                                {{ $order->events->judul ?? 'N/A' }}
+                            <td class="text-sm text-gray-700 max-w-[180px]">
+                                <div class="font-semibold text-gray-800 truncate">{{ $order->events->judul ?? 'N/A' }}</div>
+                                <div class="text-xs text-gray-400 flex items-center gap-1 mt-0.5 truncate">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    {{ $order->events->lokasi ?? 'N/A' }}
+                                </div>
                             </td>
                             <td class="text-xs text-gray-500">
                                 {{ $order->order_date ? \Carbon\Carbon::parse($order->order_date)->format('d M Y, H:i') : 'N/A' }}
